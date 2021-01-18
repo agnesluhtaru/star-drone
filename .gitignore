@@ -1,8 +1,8 @@
 # Data folders
 test-images/
-calibration_images/
-calibration_results/
-markers/
+localization_module/calibration_images/
+localization_module/calibration_results/
+localization_module/markers_images/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
