@@ -38,14 +38,42 @@ def test_render():
     #     "##e# #\n" +\
     #     "#"
 
-    world_str = """
-           #    #
-           ## #.#
-           #.#s #
-           ##e# #
-           #
-        """
+    # world_str = """
+    #        #    #
+    #        ## #.#
+    #        #.#s #
+    #        ##e# #
+    #        #
+    #     """
 
+    world_str = """
+               ######
+               #s...#
+               #....#
+               #....#
+               #...e#
+               ######
+            """
+
+    demo_run(world_str)
+
+
+
+def test_visibility_visiting():
+    world_str = """
+               e
+               #######.
+               #.......
+               #.#.#.#.
+               #.....s.
+               ########
+            """
+
+    demo_run(world_str)
+
+
+
+def demo_run(world_str: str):
     world = World(10, 10, world_str)
     print(world.grid)
 
@@ -81,7 +109,8 @@ def test_render():
 
 def main():
     # small_world_test()
-    test_render()
+    # test_render()
+    test_visibility_visiting()
 
 
 

@@ -48,6 +48,7 @@ class DroneNavigation:
         self.path: [(int, int)] = []
 
         self.current_node: Node = start_node
+        self.next_node: Node = self.current_node
 
     def get_next_grid_xy(self, current_node: Node, visible_nodes: [Node]) -> (int, int):
         self.current_node = current_node
@@ -80,30 +81,43 @@ class DroneNavigation:
                 else self.handle_idle_state(current_node))
 
     def pop_next_loc_from_path(self):
-        next_node = self.path.pop(0)
+        self.next_node = self.path.pop(0)
 
         if len(self.path) == 0:
             self.state = State.IDLE
 
-        return next_node
+        return self.next_node
 
     def remember_nodes(self, visible_nodes: [Node]) -> bool:
         return any([self.remember_node(node) for node in visible_nodes])
 
     def remember_node(self, visible_node: Node) -> bool:
         x, y = visible_node.coordinates
+        self.reconsider_need_for_visit(x, y)
 
-        if self.world_grid[y, x] == DroneNavigation.UNSEEN_NODE_VALUE:
-            self.world_grid[y, x] = visible_node.node_type.value
-            return True
+        if self.world_grid[y, x] != DroneNavigation.UNSEEN_NODE_VALUE:
+            return False
 
-        return False
+        self.world_grid[y, x] = visible_node.node_type.value
+        return True
 
-    def check_if_needs_visiting(self, x: int, y: int) -> bool:
-        # TODO, not in use yet
-        return (self.world_grid[y, x] == DroneNavigation.UNSEEN_NODE_VALUE or
-                not all([self.visited[y2, x2]
-                         for x2, y2 in self.get_neighbours(x, y)]))
+    def reconsider_need_for_visit(self, x: int, y: int):
+        if self.is_visited(x, y) or not self.is_seen(x, y):
+            return
+
+        neighbours = self.get_neighbours(x, y)
+
+        if not all(self.is_seen(x2, y2) for x2, y2 in neighbours):
+            return
+
+        self.visited[y, x] = True
+
+        for x2, y2 in neighbours:
+            self.reconsider_need_for_visit(x2, y2)
+
+    def is_seen(self, x: int, y: int) -> bool:
+        return (self.is_in_bounds(x, y) and
+                self.world_grid[y, x] != DroneNavigation.UNSEEN_NODE_VALUE)
 
     def a_star(self, current_node: Node) -> [(int, int)]:
         distances = initialize_distances(self.world_grid, current_node)
@@ -117,7 +131,7 @@ class DroneNavigation:
 
             current_distance = distances[y, x]
 
-            if self.is_end(x, y) or not self.visited[y, x]:
+            if self.is_end(x, y) or not self.is_visited(x, y):
                 return get_path_from_start(x, y, previous)
 
             for x2, y2, distance_to in self.get_passable_neighbours_with_distances(x, y):
@@ -155,6 +169,9 @@ class DroneNavigation:
 
     def distance_to_end(self, x: int, y: int) -> float:
         return calculate_distance(x, y, self.end_x, self.end_y)
+
+    def is_visited(self, x: int, y: int):
+        return self.visited[y, x]
 
 
 
