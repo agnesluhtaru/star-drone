@@ -89,14 +89,18 @@ class DroneNavigation:
         return self.next_node
 
     def remember_nodes(self, visible_nodes: [Node]) -> bool:
-        return any([self.remember_node(node) for node in visible_nodes])
+        found_ned_nodes = any([self.remember_node(node) for node in visible_nodes])
+
+        for node in visible_nodes:
+            x, y = node.coordinates
+            self.reconsider_need_for_visit(x, y)
+
+        return found_ned_nodes
 
     def remember_node(self, visible_node: Node) -> bool:
         x, y = visible_node.coordinates
         if not self.is_in_bounds(x, y):
             return False
-
-        self.reconsider_need_for_visit(x, y)
 
         if self.world_grid[y, x] != DroneNavigation.UNSEEN_NODE_VALUE:
             return False
@@ -105,7 +109,10 @@ class DroneNavigation:
         return True
 
     def reconsider_need_for_visit(self, x: int, y: int):
-        if not self.is_in_bounds(x, y) or self.is_visited(x, y) or not self.is_seen(x, y):
+        if not self.is_in_bounds(x, y):
+            return
+
+        if self.is_visited(x, y) or not self.is_seen(x, y):
             return
 
         neighbours = self.get_neighbours(x, y)
