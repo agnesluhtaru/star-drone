@@ -26,15 +26,15 @@ def calculate_distance(x1: int, y1: int, x2: int, y2: int) -> float:
 class DroneNavigation:
     UNSEEN_NODE_VALUE = -1
 
-    NEIGHBOUR_INDEX_OFFSETS = [(dx, dy) for dx, dy in World.NEIGHBOUR_INDEX_OFFSETS]
-    NEIGHBOUR_INDEX_OFFSETS_DISTANCED = [(dx, dy, calculate_distance(0, 0, dx, dy))
-                                         for dx, dy in NEIGHBOUR_INDEX_OFFSETS]
+    NEIGHBOUR_GRID_OFFSETS = [(dx, dy) for dx, dy in World.NEIGHBOUR_GRID_OFFSETS]
+    NEIGHBOUR_GRID_OFFSETS_DISTANCED = [(dx, dy, calculate_distance(0, 0, dx, dy))
+                                        for dx, dy in NEIGHBOUR_GRID_OFFSETS]
 
     PASSABLE_NODETYPES = NodeTypeStatics.PASSABLE_TYPES
     PASSABLE_VALUES = NodeTypeStatics.PASSABLE_VALUES
 
     def __init__(self, world_rows: int, world_columns: int, start_node: Node, end_node: Node):
-        self.world: np.array = initialize_world(
+        self.world_grid: np.array = initialize_world(
                 world_rows, world_columns, start_node)
         self.visited: np.array = initialize_visited(
                 world_rows, world_columns, start_node)
@@ -49,7 +49,7 @@ class DroneNavigation:
 
         self.current_node: Node = start_node
 
-    def get_next_node(self, current_node: Node, visible_nodes: [Node]) -> (int, int):
+    def get_next_grid_xy(self, current_node: Node, visible_nodes: [Node]) -> (int, int):
         self.current_node = current_node
 
         x, y = current_node.coordinates
@@ -72,14 +72,14 @@ class DroneNavigation:
             return current_node.coordinates
 
         self.state = State.MOVING
-        return self.pop_next_node_from_path()
+        return self.pop_next_loc_from_path()
 
     def handle_moving_state(self, current_node: Node) -> (int, int):
-        return (self.pop_next_node_from_path()
+        return (self.pop_next_loc_from_path()
                 if 0 < len(self.path)
                 else self.handle_idle_state(current_node))
 
-    def pop_next_node_from_path(self):
+    def pop_next_loc_from_path(self):
         next_node = self.path.pop(0)
 
         if len(self.path) == 0:
@@ -88,31 +88,26 @@ class DroneNavigation:
         return next_node
 
     def remember_nodes(self, visible_nodes: [Node]) -> bool:
-        found_new = False
-
-        for node in visible_nodes:
-            found_new = self.remember_node(node) or found_new
-
-        return found_new
+        return any([self.remember_node(node) for node in visible_nodes])
 
     def remember_node(self, visible_node: Node) -> bool:
         x, y = visible_node.coordinates
 
-        if self.world[y, x] == DroneNavigation.UNSEEN_NODE_VALUE:
-            self.world[y, x] = visible_node.node_type.value
+        if self.world_grid[y, x] == DroneNavigation.UNSEEN_NODE_VALUE:
+            self.world_grid[y, x] = visible_node.node_type.value
             return True
 
         return False
 
     def check_if_needs_visiting(self, x: int, y: int) -> bool:
         # TODO, not in use yet
-        return (self.world[y, x] == DroneNavigation.UNSEEN_NODE_VALUE or
+        return (self.world_grid[y, x] == DroneNavigation.UNSEEN_NODE_VALUE or
                 not all([self.visited[y2, x2]
                          for x2, y2 in self.get_neighbours(x, y)]))
 
     def a_star(self, current_node: Node) -> [(int, int)]:
-        distances = initialize_distances(self.world, current_node)
-        previous = initialize_previous(self.world)
+        distances = initialize_distances(self.world_grid, current_node)
+        previous = initialize_previous(self.world_grid)
 
         queue = QueueWrap([(0, current_node.coordinates)])
 
@@ -122,7 +117,7 @@ class DroneNavigation:
 
             current_distance = distances[y, x]
 
-            if self.is_end_node(x, y) or not self.visited[y, x]:
+            if self.is_end(x, y) or not self.visited[y, x]:
                 return get_path_from_start(x, y, previous)
 
             for x2, y2, distance_to in self.get_passable_neighbours_with_distances(x, y):
@@ -138,22 +133,22 @@ class DroneNavigation:
 
         return []  # means there is no way to get to end
 
-    def is_end_node(self, x: int, y: int) -> bool:
+    def is_end(self, x: int, y: int) -> bool:
         return (x, y) == (self.end_x, self.end_y)
 
     def get_neighbours(self, x: int, y: int) -> [(int, int)]:
         return list(filter(lambda pair: self.is_in_bounds(pair[0], pair[1]),
                            [(x + dx, y + dy)
-                            for dx, dy in DroneNavigation.NEIGHBOUR_INDEX_OFFSETS]))
+                            for dx, dy in DroneNavigation.NEIGHBOUR_GRID_OFFSETS]))
 
     def get_passable_neighbours_with_distances(self, x: int, y: int) -> [(int, int, float)]:
-        return list(filter(lambda triple: self.is_node_passable(triple[0], triple[1]),
+        return list(filter(lambda triple: self.is_passable(triple[0], triple[1]),
                            [(x + dx, y + dy, distance)
                             for dx, dy, distance in
-                            DroneNavigation.NEIGHBOUR_INDEX_OFFSETS_DISTANCED]))
+                            DroneNavigation.NEIGHBOUR_GRID_OFFSETS_DISTANCED]))
 
-    def is_node_passable(self, x: int, y: int) -> bool:
-        return self.is_in_bounds(x, y) and self.world[y, x] in DroneNavigation.PASSABLE_VALUES
+    def is_passable(self, x: int, y: int) -> bool:
+        return self.is_in_bounds(x, y) and self.world_grid[y, x] in DroneNavigation.PASSABLE_VALUES
 
     def is_in_bounds(self, x2: int, y2: int) -> bool:
         return 0 <= x2 < self.world_columns and 0 <= y2 < self.world_rows

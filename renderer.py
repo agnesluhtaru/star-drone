@@ -67,7 +67,7 @@ def render_world_image(world: World, dimensions: (int, int),
             x2 = upscale * x
             x2_end = upscale * (x + 1)
 
-            nodetype_value = world.array[y, x]
+            nodetype_value = world.grid[y, x]
             color = scale_color_alpha(NODETYPE_VALUE_TO_COLORS[nodetype_value], alpha_scale)
 
             drawing.rectangle([x2, y2, x2_end, y2_end], fill=color)
@@ -91,7 +91,7 @@ def render_drone_navigation_to_drawing(drone_navigation: DroneNavigation, dimens
             x2 = upscale * x
             x2_end = upscale * (x + 1) - 1
 
-            nodetype_value = drone_navigation.world[y, x]
+            nodetype_value = drone_navigation.world_grid[y, x]
 
             if nodetype_value == -1:
                 continue

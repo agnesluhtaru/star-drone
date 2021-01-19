@@ -7,58 +7,58 @@ from nodetype import *
 
 class World:
     # this is not the same as visibility
-    NEIGHBOUR_INDEX_OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    NEIGHBOUR_GRID_OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     def __init__(self, room_width: float, room_depth: float,
                  world_string: str, minimize_world: bool = True):
-        self.array: np.array = create_world(world_string, minimize_world)
+        self.grid: np.array = create_world(world_string, minimize_world)
 
-        self.n_rows, self.n_columns = self.array.shape
-        self.room_width, self.room_depth = (room_width, room_depth)  # <- might as well forget it
+        self.n_rows, self.n_columns = self.grid.shape
+        self.room_width, self.room_depth = (room_width, room_depth)  # <- might as well forget it?
         self.node_width: float = room_width / self.n_columns
         self.node_height: float = room_depth / self.n_rows
 
         self.start_node: Node = find_start_node(self)
         self.end_node: Node = find_end_node(self)
 
-    def is_index_in_bounds(self, index_x: int, index_y: int) -> bool:
-        return 0 <= index_x < self.n_columns and 0 <= index_y < self.n_rows
+    def is_grid_loc_in_bounds(self, grid_x: int, grid_y: int) -> bool:
+        return 0 <= grid_x < self.n_columns and 0 <= grid_y < self.n_rows
 
-    def find_nodetype_value_at_index(self, index_x: int, index_y: int) -> int:
-        return (self.array[index_y, index_x]
-                if self.is_index_in_bounds(index_x, index_y)
+    def find_nodetype_value_at_grid_loc(self, grid_x: int, grid_y: int) -> int:
+        return (self.grid[grid_y, grid_x]
+                if self.is_grid_loc_in_bounds(grid_x, grid_y)
                 else NodeType.VACANT.value)
 
-    def find_nodetype_at_index(self, index_x: int, index_y: int) -> NodeType:
+    def find_nodetype_at_grid_loc(self, grid_x: int, grid_y: int) -> NodeType:
         return NodeTypeStatics.value_to_nodetype[
-            self.find_nodetype_value_at_index(index_x, index_y)]
+            self.find_nodetype_value_at_grid_loc(grid_x, grid_y)]
 
-    def index_to_node(self, index_x: int, index_y: int) -> Node:
-        return Node(self.find_nodetype_at_index(index_x, index_y),
-                    (index_x + 0.5) * self.node_width,
-                    (index_y + 0.5) * self.node_height,
-                    index_x, index_y)
+    def grid_loc_to_node(self, grid_x: int, grid_y: int) -> Node:
+        return Node(self.find_nodetype_at_grid_loc(grid_x, grid_y),
+                    (grid_x + 0.5) * self.node_width,
+                    (grid_y + 0.5) * self.node_height,
+                    grid_x, grid_y)
 
-    def is_index_passable(self, index_x: int, index_y: int) -> bool:
-        return (self.find_nodetype_value_at_index(index_x, index_y)
+    def is_grid_loc_passable(self, grid_x: int, grid_y: int) -> bool:
+        return (self.find_nodetype_value_at_grid_loc(grid_x, grid_y)
                 in NodeTypeStatics.PASSABLE_VALUES)
 
     def get_neighbours(self, node: Node) -> [Node]:
-        return [self.index_to_node(i, j)
-                for i, j in get_neighbour_indices(node)
-                # if self.is_index_passable(i, j)]
-                if self.is_index_in_bounds(i, j)]
+        return [self.grid_loc_to_node(i, j)
+                for i, j in get_neighbour_grid_locs(node)
+                # if self.is_grid_loc_passable(i, j)]
+                if self.is_grid_loc_in_bounds(i, j)]
 
     def get_node_by_pos(self, x: float, y: float) -> Node:
-        return self.index_to_node(int(x / self.node_width), int(y / self.node_height))
+        return self.grid_loc_to_node(int(x / self.node_width), int(y / self.node_height))
 
 
 
-def get_neighbour_indices(node: Node) -> [(int, int)]:
-    index_x, index_y = node.coordinates
+def get_neighbour_grid_locs(node: Node) -> [(int, int)]:
+    grid_x, grid_y = node.coordinates
 
-    return [(index_x + offset_x, index_y + offset_y)
-            for offset_x, offset_y in World.NEIGHBOUR_INDEX_OFFSETS]
+    return [(grid_x + offset_x, grid_y + offset_y)
+            for offset_x, offset_y in World.NEIGHBOUR_GRID_OFFSETS]
 
 
 
@@ -127,7 +127,7 @@ def find_necessary_row_range(array: np.array, n: int) -> (int, int):
 
 
 def find_node_of_type(world: World, nodetype: NodeType) -> Node or None:
-    world_array = world.array
+    world_array = world.grid
     nodetype_value = nodetype.value
 
     n_i, n_j = world_array.shape
@@ -135,7 +135,7 @@ def find_node_of_type(world: World, nodetype: NodeType) -> Node or None:
     for i in range(n_i):
         for j in range(n_j):
             if world_array[i, j] == nodetype_value:
-                return world.index_to_node(j, i)
+                return world.grid_loc_to_node(j, i)
 
     return None
 

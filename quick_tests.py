@@ -14,9 +14,9 @@ def small_world_test():
     world = World(10, 10, world_str)
 
     print(world_str)
-    print(world.array)
+    print(world.grid)
     print()
-    print(world.array.shape)
+    print(world.grid.shape)
 
     node = world.get_node_by_pos(4, 2.9)
     print(node)
@@ -47,7 +47,7 @@ def test_render():
         """
 
     world = World(10, 10, world_str)
-    print(world.array)
+    print(world.grid)
 
     drone_navigation = DroneNavigation(world.n_rows, world.n_columns,
                                        world.start_node, world.end_node)
@@ -63,16 +63,16 @@ def test_render():
         visible_nodes = world.get_neighbours(current_node)
         print([node.coordinates for node in visible_nodes], end=" -> ")
 
-        next_node = drone_navigation.get_next_node(current_node, visible_nodes)
+        next_node = drone_navigation.get_next_grid_xy(current_node, visible_nodes)
 
         render_and_save(world, drone_navigation, f"test_output_{i}.png", upscale=50, show=True)
-        current_node = world.index_to_node(next_node[0], next_node[1])
+        current_node = world.grid_loc_to_node(next_node[0], next_node[1])
         print(current_node)
 
         input("<Press ENTER to continue!>")
         i += 1
 
-    drone_navigation.get_next_node(current_node, [])
+    drone_navigation.get_next_grid_xy(current_node, [])
     render_and_save(world, drone_navigation, f"test_output_{i}.png", upscale=50, show=True)
 
     print("done")
