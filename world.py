@@ -30,8 +30,8 @@ class World:
                 else NodeType.VACANT.value)
 
     def find_nodetype_at_grid_loc(self, grid_x: int, grid_y: int) -> NodeType:
-        return NodeTypeStatics.value_to_nodetype[
-            self.find_nodetype_value_at_grid_loc(grid_x, grid_y)]
+        return NodeTypeStatics.value_to_nodetype[self.find_nodetype_value_at_grid_loc(grid_x,
+                                                                                      grid_y)]
 
     def grid_loc_to_node(self, grid_x: int, grid_y: int) -> Node:
         return Node(self.find_nodetype_at_grid_loc(grid_x, grid_y),
@@ -40,14 +40,28 @@ class World:
                     grid_x, grid_y)
 
     def is_grid_loc_passable(self, grid_x: int, grid_y: int) -> bool:
-        return (self.find_nodetype_value_at_grid_loc(grid_x, grid_y)
+        return (self.is_grid_loc_in_bounds(grid_x, grid_y) and
+                self.find_nodetype_value_at_grid_loc(grid_x, grid_y)
                 in NodeTypeStatics.PASSABLE_VALUES)
 
-    def get_neighbours(self, node: Node) -> [Node]:
+    def get_neighbouring_nodes(self, node: Node) -> [Node]:
         return [self.grid_loc_to_node(i, j)
                 for i, j in get_neighbour_grid_locs(node)
-                # if self.is_grid_loc_passable(i, j)]
                 if self.is_grid_loc_in_bounds(i, j)]
+
+    def temp_visibility(self, current_node: Node, neighbours: [Node]) -> [Node]:
+        output = list(neighbours)
+
+        x, y = current_node.coordinates
+
+        for dx, dy in [(1, 1), (1, -1), (-1, -1), (-1, 1)]:
+            if self.is_grid_loc_passable(x + dx, y) or self.is_grid_loc_passable(x, y + dy):
+                output.append(self.grid_loc_to_node(x + dx, y + dy))
+
+        return output
+
+    def get_visible_nodes(self, node: Node) -> [Node]:
+        return self.temp_visibility(node, self.get_neighbouring_nodes(node))
 
     def get_node_by_pos(self, x: float, y: float) -> Node:
         return self.grid_loc_to_node(int(x / self.node_width), int(y / self.node_height))
