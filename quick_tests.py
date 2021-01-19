@@ -21,7 +21,7 @@ def small_world_test():
     node = world.get_node_by_pos(4, 2.9)
     print(node)
 
-    neighbours = world.get_neighbours(node)
+    neighbours = world.get_neighbouring_nodes(node)
     print("neighbours:")
     for neighbour in neighbours:
         print(f"\t{neighbour}")
@@ -88,7 +88,7 @@ def demo_run(world_str: str):
         print(f"Iteration {i}: ", end="")
         print(current_node, end=" -> ")
 
-        visible_nodes = world.get_neighbours(current_node)
+        visible_nodes = world.get_visible_nodes(current_node)
         print([node.coordinates for node in visible_nodes], end=" -> ")
 
         next_node = drone_navigation.get_next_grid_xy(current_node, visible_nodes)
