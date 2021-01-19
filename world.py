@@ -9,8 +9,9 @@ class World:
     # this is not the same as visibility
     NEIGHBOUR_GRID_OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-    def __init__(self, room_width: float, room_depth: float,
-                 world_string: str, minimize_world: bool = True):
+    def __init__(self, world_string: str,
+                 room_width: float, room_depth: float,
+                 minimize_world: bool = True):
         self.grid: np.array = create_world(world_string, minimize_world)
 
         self.n_rows, self.n_columns = self.grid.shape

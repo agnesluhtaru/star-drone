@@ -11,7 +11,7 @@ def small_world_test():
          #
     """
 
-    world = World(10, 10, world_str)
+    world = World(world_str, 10, 10)
 
     print(world_str)
     print(world.grid)
@@ -50,7 +50,6 @@ def test_render():
                ######
                #s...#
                #....#
-               #....#
                #...e#
                ######
             """
@@ -73,8 +72,8 @@ def test_visibility_visiting():
 
 
 
-def demo_run(world_str: str):
-    world = World(10, 10, world_str)
+def demo_run(world_str: str, room_width: float = 10, room_depth: float = 10):
+    world = World(world_str, room_width, room_width)
     print(world.grid)
 
     drone_navigation = DroneNavigation(world.n_rows, world.n_columns,
@@ -109,8 +108,8 @@ def demo_run(world_str: str):
 
 def main():
     # small_world_test()
-    # test_render()
-    test_visibility_visiting()
+    test_render()
+    # test_visibility_visiting()
 
 
 
