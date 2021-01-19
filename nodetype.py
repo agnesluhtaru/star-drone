@@ -25,5 +25,5 @@ class NodeTypeStatics:
     nodetype_to_character = dict((nodetype, character)
                                  for character, nodetype in character_to_nodetype.items())
 
-    passable_types = [NodeType.VACANT, NodeType.START, NodeType.END]
-    passable_values = [type.value for type in passable_types]
+    PASSABLE_TYPES = {NodeType.VACANT, NodeType.START, NodeType.END}
+    PASSABLE_VALUES = set([type.value for type in PASSABLE_TYPES])
