@@ -9,14 +9,19 @@ class World:
     # this is not the same as visibility
     NEIGHBOUR_GRID_OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-    def __init__(self, room_width: float, room_depth: float,
+#    def __init__(self, room_width: float, room_depth: float,
+#                 world_string: str, minimize_world: bool = True):
+
+    def __init__(self, node_width: float, node_depth: float,
                  world_string: str, minimize_world: bool = True):
         self.grid: np.array = create_world(world_string, minimize_world)
 
         self.n_rows, self.n_columns = self.grid.shape
-        self.room_width, self.room_depth = (room_width, room_depth)  # <- might as well forget it?
-        self.node_width: float = room_width / self.n_columns
-        self.node_height: float = room_depth / self.n_rows
+        self.room_width, self.room_depth = (self.n_columns * node_width, self.n_rows * node_depth)  # <- might as well forget it?
+        #self.node_width: float = node_width / self.n_columns
+        #self.node_height: float = node_depth / self.n_rows
+        self.node_width: float = node_width
+        self.node_height: float = node_depth
 
         self.start_node: Node = find_start_node(self)
         self.end_node: Node = find_end_node(self)

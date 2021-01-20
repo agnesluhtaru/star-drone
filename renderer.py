@@ -52,12 +52,13 @@ def render(world: World, drone_navigation: DroneNavigation, upscale: int = 1) ->
     background = Image.new("RGBA", dimensions, (255, 255, 255))
 
     world_layer = render_world_image(world, dimensions, upscale, ALPHA_WORLD)
-    navigation_layer = render_drone_navigation_to_drawing(drone_navigation, dimensions, upscale,
-                                                          ALPHA_NAVIGATION)
+    navigation_layer = render_drone_navigation_to_drawing(drone_navigation, dimensions, upscale, ALPHA_NAVIGATION)
     grid_overlay = render_grid_overlay(world, dimensions, upscale, ALPHA_GRID)
 
     return Image.alpha_composite(Image.alpha_composite(Image.alpha_composite(
             background, world_layer), navigation_layer), grid_overlay)
+
+    # return Image.alpha_composite(Image.alpha_composite(background, world_layer), grid_overlay)
     # return Image.alpha_composite(background, world_layer)
     # return Image.alpha_composite(background, navigation_layer)
 

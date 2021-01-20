@@ -6,20 +6,27 @@ import time
 
 import numpy as np
 import cv2
+import easytello
+
 
 NUMBER_OF_IMAGES = 100
 CHESS_X = 6
 CHESS_Y = 8
 
 
-def take_images():
-    cap = cv2.VideoCapture(0)
-    for i in range(NUMBER_OF_IMAGES*10):
+def init_drone():
+    drone = easytello.Tello()
+    drone.send_command('streamon')
+
+
+def take_images(vid=0):
+    cap = cv2.VideoCapture(DRONE_STREAM)
+    for i in range(NUMBER_OF_IMAGES * 10):
         ret, frame = cap.read()
         cv2.imshow("Calibration", frame)
         if i % 10 == 0:
-            print(i/10)
-            cv2.imwrite(f'calibration_images/{int(i/10)}.png', frame)
+            print(i / 10)
+            cv2.imwrite(f'localization_module/calibration_images/{int(i / 10)}.png', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -36,7 +43,7 @@ def chessboard():
 
     for i in range(int(NUMBER_OF_IMAGES)):
         print(i)
-        file_name = f'calibration_images/{i}.png'
+        file_name = f'localization_module/calibration_images/{i}.png'
         image = cv2.imread(file_name)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -52,18 +59,20 @@ def chessboard():
             img = cv2.drawChessboardCorners(image, (CHESS_Y, CHESS_X), corners2, ret)
             cv2.imshow('img', img)
             cv2.waitKey(5)
+
     cv2.destroyAllWindows()
     return objpoints, imgpoints, gray
 
 
 def calibrate_camera(objpoints, imgpoints, gray):
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-    np.savetxt('calibration_results/camera-matrix.txt', mtx)
-    np.savetxt('calibration_results/dist.txt', dist)
+    np.savetxt('localization_module/calibration_results/camera-matrix.txt', mtx)
+    np.savetxt('localization_module/calibration_results/dist.txt', dist)
     print(ret)
 
 
 if __name__ == '__main__':
-    take_images()
+    #init_drone()
+    #take_images(DRONE_STREAM)
     objpoints, imgpoints, gray = chessboard()
     calibrate_camera(objpoints, imgpoints, gray)

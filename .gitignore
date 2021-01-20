@@ -1,5 +1,6 @@
 # Data folders
 test-images/
+output/
 localization_module/calibration_images/
 localization_module/calibration_results/
 localization_module/markers_images/

@@ -1,7 +1,6 @@
 from renderer import *
 
 
-
 def small_world_test():
     world_str = """
             #
@@ -25,7 +24,6 @@ def small_world_test():
     print("neighbours:")
     for neighbour in neighbours:
         print(f"\t{neighbour}")
-
 
 
 def test_render():
@@ -58,7 +56,6 @@ def test_render():
     demo_run(world_str)
 
 
-
 def test_visibility_visiting():
     world_str = """
                e
@@ -72,9 +69,20 @@ def test_visibility_visiting():
     demo_run(world_str)
 
 
+def test_real_space():
+    world_str = """
+               ######
+               #s...#
+               #....#
+               #...e#
+               ######
+            """
+
+    demo_run(world_str)
+
 
 def demo_run(world_str: str):
-    world = World(10, 10, world_str)
+    world = World(61.5 * 6, 61.5 * 5, world_str)
     print(world.grid)
 
     drone_navigation = DroneNavigation(world.n_rows, world.n_columns,
@@ -91,27 +99,29 @@ def demo_run(world_str: str):
         visible_nodes = world.get_visible_nodes(current_node)
         print([node.coordinates for node in visible_nodes], end=" -> ")
 
+        # give, take
         next_node = drone_navigation.get_next_grid_xy(current_node, visible_nodes)
 
-        render_and_save(world, drone_navigation, f"test_output_{i}.png", upscale=50, show=True)
+        # give, take
+
+        render_and_save(world, drone_navigation, f"test_output_{i}.png", upscale=50, show=False)
         current_node = world.grid_loc_to_node(next_node[0], next_node[1])
         print(current_node)
 
-        input("<Press ENTER to continue!>")
+        #input("<Press ENTER to continue!>")
         i += 1
 
     drone_navigation.get_next_grid_xy(current_node, [])
-    render_and_save(world, drone_navigation, f"test_output_{i}.png", upscale=50, show=True)
+    render_and_save(world, drone_navigation, f"test_output_{i}.png", upscale=50, show=False)
 
     print("done")
-
 
 
 def main():
     # small_world_test()
     # test_render()
-    test_visibility_visiting()
-
+    # test_visibility_visiting()
+    test_real_space()
 
 
 if __name__ == '__main__':
