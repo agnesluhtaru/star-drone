@@ -4,25 +4,26 @@ from node import *
 from nodetype import *
 from queuewrap import QueueWrap
 
+
 EPSILON = 0.01
 POINT_OFFSETS = [(0.5, 0.5), (0, 0), (1, 0), (0, 1), (1, 1)]
+
 
 
 class World:
     # this is not the same as visibility
     NEIGHBOUR_GRID_OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-    #    def __init__(self, room_width: float, room_depth: float,
-    #                 world_string: str, minimize_world: bool = True):
+    # def __init__(self, world_string: str, room_width: float, room_depth: float,
+    #              minimize_world: bool = True):
 
-    def __init__(self, node_width: float, node_depth: float,
-                 world_string: str, minimize_world: bool = True):
-
+    def __init__(self, world_string: str, node_width: float, node_depth: float,
+                 minimize_world: bool = True):
         self.grid: np.array = create_world(world_string, minimize_world)
 
         self.n_rows, self.n_columns = self.grid.shape
-        self.room_width, self.room_depth = (
-        self.n_columns * node_width, self.n_rows * node_depth)  # <- might as well forget it?
+        self.room_width, self.room_depth = (self.n_columns * node_width,
+                                            self.n_rows * node_depth)  # <- might as well forget it?
         # self.node_width: float = node_width / self.n_columns
         # self.node_height: float = node_depth / self.n_rows
         self.node_width: float = node_width
@@ -119,6 +120,7 @@ class World:
         return self.grid_loc_to_node(int(x / self.node_width), int(y / self.node_height))
 
 
+
 def get_neighbour_grid_locs(node: Node) -> [(int, int)]:
     grid_x, grid_y = node.coordinates
 
@@ -126,9 +128,11 @@ def get_neighbour_grid_locs(node: Node) -> [(int, int)]:
             for offset_x, offset_y in World.NEIGHBOUR_GRID_OFFSETS]
 
 
+
 def create_world(world_string: str, minimal: bool) -> np.array:
     array = world_string_to_array(fix_spaces(world_string))
     return clean_world_array(array) if minimal else array
+
 
 
 def world_string_to_array(world_string: str) -> np.array:
@@ -146,6 +150,7 @@ def world_string_to_array(world_string: str) -> np.array:
     return array
 
 
+
 def fix_spaces(world_string: str) -> str:
     space_replacer = NodeTypeStatics.nodetype_to_character[NodeType.VACANT]
 
@@ -155,14 +160,16 @@ def fix_spaces(world_string: str) -> str:
     return world_string
 
 
+
 def clean_world_array(world_array: np.array) -> np.array:
     row_n, column_n = world_array.shape
 
     row_first, row_last = find_necessary_row_range(world_array, row_n)
     column_first, column_last = find_necessary_row_range(
-        world_array.transpose(), column_n)
+            world_array.transpose(), column_n)
 
     return world_array[row_first:row_last, column_first:column_last]
+
 
 
 def find_necessary_row_range(array: np.array, n: int) -> (int, int):
@@ -185,6 +192,7 @@ def find_necessary_row_range(array: np.array, n: int) -> (int, int):
     return first, last
 
 
+
 def find_node_of_type(world: World, nodetype: NodeType) -> Node or None:
     world_array = world.grid
     nodetype_value = nodetype.value
@@ -199,18 +207,22 @@ def find_node_of_type(world: World, nodetype: NodeType) -> Node or None:
     return None
 
 
+
 def find_end_node(world: World) -> Node or None:
     return find_node_of_type(world, NodeType.END)
+
 
 
 def find_start_node(world: World) -> Node or None:
     return find_node_of_type(world, NodeType.START)
 
 
+
 def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5  # euclidean
     # return max(abs(x2 - x1), abs(y2 - y1))  # octal
     # return abs(x2 - x1) + abs(y2 - y1)  # manhattan
+
 
 
 def get_overshoot_checker(x: float, y: float, sx: float, sy: float) -> callable:
@@ -225,6 +237,7 @@ def get_overshoot_checker(x: float, y: float, sx: float, sy: float) -> callable:
         return False
 
     return overshoot_checker
+
 
 
 def get_visibility_neighbours(x: int, y: int, sx: int, sy: int) -> [(int, int)]:
