@@ -34,21 +34,19 @@ class DroneNavigation:
     PASSABLE_VALUES = NodeTypeStatics.PASSABLE_VALUES
 
     def __init__(self, world_rows: int, world_columns: int, start_node: Node, end_node: Node):
-        self.world_grid: np.array = initialize_world(
-                world_rows, world_columns, start_node)
-        self.visited: np.array = initialize_visited(
-                world_rows, world_columns, start_node)
+        self.world_grid: np.array = initialize_world(world_rows, world_columns, start_node)
+        self.visited: np.array = initialize_visited(world_rows, world_columns, start_node)
 
         self.end_x, self.end_y = end_node.coordinates
 
-        self.world_rows = world_rows
-        self.world_columns = world_columns
+        self.world_rows: int = world_rows
+        self.world_columns: int = world_columns
 
         self.state: State = State.IDLE
         self.path: [(int, int)] = []
 
         self.current_node: Node = start_node
-        self.next_node: Node = self.current_node
+        self.next_node: (int, int) = self.current_node
 
     def get_next_grid_xy(self, current_node: Node, visible_nodes: [Node]) -> (int, int):
         self.current_node = current_node
