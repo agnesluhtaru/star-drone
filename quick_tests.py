@@ -21,7 +21,7 @@ def small_world_test():
     node = world.get_node_by_pos(4, 2.9)
     print(node)
 
-    neighbours = world.get_neighbouring_nodes(node)
+    neighbours = world.get_in_bounds_neighbouring_nodes(node)
     print("neighbours:")
     for neighbour in neighbours:
         print(f"\t{neighbour}")
@@ -46,13 +46,21 @@ def test_render():
     #        #
     #     """
 
-    world_str = """
-               ######
-               #s...#
-               #....#
-               #...e#
-               ######
-            """
+    # world_str = """
+    #            ######
+    #            #s...#
+    #            #....#
+    #            #...e#
+    #            ######
+    #         """
+
+    # world_str = """
+    #            ######
+    #            #s...#
+    #            #.##.#
+    #            #.##e#
+    #            ######
+    #         """
 
     demo_run(world_str)
 
@@ -61,11 +69,11 @@ def test_render():
 def test_visibility_visiting():
     world_str = """
                e
-               #######.
-               #.......
+               #######.#
+               #.......#.#
                #.#.#.#.
-               #.....s.
-               ########
+               #.....s.#
+               #########
             """
 
     demo_run(world_str)
@@ -73,7 +81,7 @@ def test_visibility_visiting():
 
 
 def demo_run(world_str: str, room_width: float = 10, room_depth: float = 10):
-    world = World(world_str, room_width, room_width)
+    world = World(world_str, room_width, room_depth)
     print(world.grid)
 
     drone_navigation = DroneNavigation(world.n_rows, world.n_columns,
@@ -108,8 +116,8 @@ def demo_run(world_str: str, room_width: float = 10, room_depth: float = 10):
 
 def main():
     # small_world_test()
-    test_render()
-    # test_visibility_visiting()
+    # test_render()
+    test_visibility_visiting()
 
 
 
