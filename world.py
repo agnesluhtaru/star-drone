@@ -109,7 +109,7 @@ class World:
 
             for neighbour in self.get_in_bounds_neighbouring_nodes(node):
                 x2, y2 = neighbour.coordinates
-                queue.push(calculate_distance(x, y, x2, y2), (x2, y2))
+                queue.push(calculate_distance(sx, sy, x2, y2), (x2, y2))
 
         return output
 

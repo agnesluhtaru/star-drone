@@ -7,7 +7,7 @@ def generate_marker_image(number, size, dictionary):
     marker_image = np.zeros((size, size), dtype=np.uint8)
     marker_image = cv2.aruco.drawMarker(dictionary, number, size, marker_image, 1)
     marker_image = cv2.copyMakeBorder(marker_image, 50, 50, 50, 50, cv2.BORDER_CONSTANT, None, (255, 255, 255))
-    marker_image = cv2.copyMakeBorder(marker_image, 5, 5, 5, 5, cv2.BORDER_CONSTANT, None, (0, 0, 0))
+    #marker_image = cv2.copyMakeBorder(marker_image, 5, 5, 5, 5, cv2.BORDER_CONSTANT, None, (0, 0, 0))
     cv2.imwrite(f'markers_images/marker{number}-{size}.png', marker_image)
     return marker_image
 
