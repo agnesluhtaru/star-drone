@@ -34,21 +34,19 @@ class DroneNavigation:
     PASSABLE_VALUES = NodeTypeStatics.PASSABLE_VALUES
 
     def __init__(self, world_rows: int, world_columns: int, start_node: Node, end_node: Node):
-        self.world_grid: np.array = initialize_world(
-                world_rows, world_columns, start_node)
-        self.visited: np.array = initialize_visited(
-                world_rows, world_columns, start_node)
+        self.world_grid: np.array = initialize_world(world_rows, world_columns, start_node)
+        self.visited: np.array = initialize_visited(world_rows, world_columns, start_node)
 
         self.end_x, self.end_y = end_node.coordinates
 
-        self.world_rows = world_rows
-        self.world_columns = world_columns
+        self.world_rows: int = world_rows
+        self.world_columns: int = world_columns
 
         self.state: State = State.IDLE
         self.path: [(int, int)] = []
 
         self.current_node: Node = start_node
-        self.next_node: Node = self.current_node
+        self.next_node: (int, int) = self.current_node
 
     def get_next_grid_xy(self, current_node: Node, visible_nodes: [Node]) -> (int, int):
         self.current_node = current_node
@@ -89,14 +87,18 @@ class DroneNavigation:
         return self.next_node
 
     def remember_nodes(self, visible_nodes: [Node]) -> bool:
-        return any([self.remember_node(node) for node in visible_nodes])
+        found_ned_nodes = any([self.remember_node(node) for node in visible_nodes])
+
+        for node in visible_nodes:
+            x, y = node.coordinates
+            self.reconsider_need_for_visit(x, y)
+
+        return found_ned_nodes
 
     def remember_node(self, visible_node: Node) -> bool:
         x, y = visible_node.coordinates
         if not self.is_in_bounds(x, y):
             return False
-
-        self.reconsider_need_for_visit(x, y)
 
         if self.world_grid[y, x] != DroneNavigation.UNSEEN_NODE_VALUE:
             return False
@@ -105,7 +107,10 @@ class DroneNavigation:
         return True
 
     def reconsider_need_for_visit(self, x: int, y: int):
-        if not self.is_in_bounds(x, y) or self.is_visited(x, y) or not self.is_seen(x, y):
+        if not self.is_in_bounds(x, y):
+            return
+
+        if self.is_visited(x, y) or not self.is_seen(x, y):
             return
 
         neighbours = self.get_neighbours(x, y)

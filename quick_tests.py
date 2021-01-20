@@ -10,7 +10,7 @@ def small_world_test():
          #
     """
 
-    world = World(10, 10, world_str)
+    world = World(world_str, 10, 10)
 
     print(world_str)
     print(world.grid)
@@ -20,7 +20,7 @@ def small_world_test():
     node = world.get_node_by_pos(4, 2.9)
     print(node)
 
-    neighbours = world.get_neighbouring_nodes(node)
+    neighbours = world.get_in_bounds_neighbouring_nodes(node)
     print("neighbours:")
     for neighbour in neighbours:
         print(f"\t{neighbour}")
@@ -44,14 +44,21 @@ def test_render():
     #        #
     #     """
 
-    world_str = """
-               ######
-               #s...#
-               #....#
-               #....#
-               #...e#
-               ######
-            """
+    # world_str = """
+    #            ######
+    #            #s...#
+    #            #....#
+    #            #...e#
+    #            ######
+    #         """
+
+    # world_str = """
+    #            ######
+    #            #s...#
+    #            #.##.#
+    #            #.##e#
+    #            ######
+    #         """
 
     demo_run(world_str)
 
@@ -59,11 +66,11 @@ def test_render():
 def test_visibility_visiting():
     world_str = """
                e
-               #######.
-               #.......
+               #######.#
+               #.......#.#
                #.#.#.#.
-               #.....s.
-               ########
+               #.....s.#
+               #########
             """
 
     demo_run(world_str)
@@ -81,9 +88,8 @@ def test_real_space():
     demo_run(world_str)
 
 
-def demo_run(world_str: str):
-    world = World(61.5 * 6, 61.5 * 5, world_str)
-    print(world.grid)
+def demo_run(world_str: str, room_width: float = 10, room_depth: float = 10):
+    world = World(world_str, room_width, room_depth)
 
     drone_navigation = DroneNavigation(world.n_rows, world.n_columns,
                                        world.start_node, world.end_node)
@@ -108,7 +114,7 @@ def demo_run(world_str: str):
         current_node = world.grid_loc_to_node(next_node[0], next_node[1])
         print(current_node)
 
-        #input("<Press ENTER to continue!>")
+        # input("<Press ENTER to continue!>")
         i += 1
 
     drone_navigation.get_next_grid_xy(current_node, [])
