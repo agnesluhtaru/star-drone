@@ -74,11 +74,33 @@ class DroneNavigation:
         return self.pop_next_loc_from_path()
 
     def handle_moving_state(self, current_node: Node) -> (int, int):
-        return (self.pop_next_loc_from_path()
-                if 0 < len(self.path)
-                else self.handle_idle_state(current_node))
+        if self.is_on_next(current_node):
+            return (self.pop_next_loc_from_path()
+                    if 0 < len(self.path)
+                    else self.handle_idle_state(current_node))
 
-    def pop_next_loc_from_path(self):
+        return self.handle_out_of_path_state(current_node)
+
+    def handle_out_of_path_state(self, current_node: Node) -> (int, int):
+        coords = current_node.coordinates
+
+        if coords in self.path:
+            next_coords = self.pop_next_loc_from_path()
+            while next_coords != coords:
+                next_coords = self.pop_next_loc_from_path()
+
+            return next_coords
+
+        self.state = State.IDLE
+        return self.handle_idle_state(current_node)
+
+    def is_on_next(self, current_node: Node) -> bool:
+        return self.next_node == current_node.coordinates
+
+    def is_on_path(self, current_node: Node) -> bool:
+        return current_node.coordinates in [self.next_node] + self.path
+
+    def pop_next_loc_from_path(self) -> (int, int):
         self.next_node = self.path.pop(0)
 
         if len(self.path) == 0:
