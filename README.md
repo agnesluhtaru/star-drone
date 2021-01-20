@@ -1,4 +1,5 @@
-# star-drone
+# Star Drone
 
-## Localization module
-Telling the locazion based on ArUco Markers in the known locations. 
+MTAT.03.238 Algorithmics project 20/21
+
+Agnes Luhtaru and Oliver Vainumäe
