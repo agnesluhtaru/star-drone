@@ -8,7 +8,8 @@ import numpy as np
 MARKER_LENGTH = 19  # cm
 DRONE_STREAM = 'udp://192.168.10.1:11111'
 
-MARKER_LOCATIONS = {4: [89, 1, 434, 1], 5: [192, 1, 434, 1], 2: [312, 1, 434, 1]}
+MARKER_LOCATIONS = {4: [89, 1, 434, 1], 3: [10, 1, 434, 1], 5: [185, 1, 434 + 61.5, 1], 2: [312, 1, 434, 1],
+                    1: [312 + 49, 1, 434, 1]}
 N = 30
 
 
@@ -38,7 +39,7 @@ class Localization:
             image, moving_averaging = self.get_location_estimate(marker_image, moving_averaging)
             image = cv2.putText(image, str(count), (5, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             cv2.imshow("DETECTION WINDOW", image)
-            time.sleep(0.01)
+            # time.sleep(0.01)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False
 

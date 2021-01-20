@@ -4,55 +4,60 @@ import time
 import cv2
 import easytello
 
-import localization_module.localization as loc
+from localization_module import localization
 
 
-def send_rc(drone, a, b, c, d):
-    command = 'rc {} {} {} {}'.format(a, b, c, d)
-    print('Sending command: {}'.format(command))
-    drone.socket.sendto(command.encode('utf-8'), drone.tello_address)
+class Controller:
+    def __init__(self):
+        self.drone = easytello.Tello()
+        self.send_rc(0, 0, 0, 0)
+        print("takeoff")
+        self.drone.takeoff()
+        self.drone.send_command('streamon')
+        self.loc = localization.Localization()
+        time.sleep(5)
+        self.last_error_x = 0
+        self.last_error_y = 0
+        self.goal_x = None
+        self.goal_y = None
+        self.control = threading.Thread(target=self.control_thread)
+        self.control.start()
 
+    def control_thread(self):
+        while self.loc.running:
+            x, y = self.goal_x, self.goal_y
+            if x is not None and y is not None:
+                command, arguments = self.proportional_checking(x, y)
+                command(*arguments)
+            time.sleep(0.1)
 
-def proportional_checking(drone, location, x, y):
-    """
-   Send RC control via four channels.
-       a: left/right (-100~100)
-       b: forward/backward (-100~100)
-       c: up/down (-100~100)
-       d: yaw (-100~100)
-    """
-    KPy = 0.5
-    KPf = 0.5
-    current_x, current_z = location.get_xy()
-    error_left = x - current_x
-    error_forward = y - current_z
-    return send_rc, (drone, -int(KPy * error_left), int(KPf * error_forward), 0, 0)
+    def proportional_checking(self, x, y):
+        """
+       Send RC control via four channels.
+           a: left/right (-100~100)
+           b: forward/backward (-100~100)
+           c: up/down (-100~100)
+           d: yaw (-100~100)
+        """
+        KPy = 0.3
+        KPf = 0.3
 
+        KDy = 0.1
+        KDf = 0.1
+        current_x, current_z = self.loc.get_xy()
+        error_left = x - current_x
+        error_forward = y - current_z
 
-def move_to_location(drone, location, x, y):
-    command, arguments = proportional_checking(drone, location, x, y)
-    command(*arguments)
+        D_left = error_left - self.last_error_x
+        D_forward = error_forward - self.last_error_y
 
+        self.last_error_x = D_left
+        self.last_error_y = D_forward
 
-def drone_init():
-    drone = easytello.Tello()
-    drone.send_command('streamon')
-    print("takeoff")
+        print(f'Px: {KPy * error_left}, Dx: {KDy * D_left}, Py: {KPf * error_forward}, Dy: {KDf * D_forward}')
+        return self.send_rc, (int(KPy * error_left + KDy * D_left), int(KPf * error_forward + KDf * D_forward), 0, 0)
 
-    drone.takeoff()
-    return drone
-
-
-if __name__ == '__main__':
-    drone = drone_init()
-    try:
-        print("TRYING TO MOVE")
-        while loc.location is None:
-            continue
-        for i in range(1):
-            move_to_location(drone, 184, 184)
-    except Exception as e:
-        loc.running = False
-        print("SAD", e)
-        drone.land()
-    drone.land()
+    def send_rc(self, a, b, c, d):
+        command = 'rc {} {} {} {}'.format(a, b, c, d)
+        #print('Sending command: {}'.format(command))
+        self.drone.socket.sendto(command.encode('utf-8'), self.drone.tello_address)
