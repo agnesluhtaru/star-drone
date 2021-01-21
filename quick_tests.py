@@ -157,11 +157,11 @@ def demo_run(world_str: str, room_width: float = 10, room_depth: float = 10,
         moved_to_grid_xy = give_take(current_node, next_grid_xy, world)
         nx, ny = moved_to_grid_xy
 
-        render_and_save(world, drone_navigation, f"test_output_{i}.png", upscale=50, show=True)
+        render_and_save(world, drone_navigation, f"test_output_{i}.png", upscale=50, show=False)
         current_node = world.grid_loc_to_node(nx, ny)
         print(current_node)
 
-        input("<Press ENTER to continue!>")
+        # input("<Press ENTER to continue!>")
         i += 1
 
     drone_navigation.get_next_grid_xy(current_node, [])
@@ -171,12 +171,43 @@ def demo_run(world_str: str, room_width: float = 10, room_depth: float = 10,
 
 
 
+def test_demo_5():
+    world_str = """
+    ...#.s
+    ......
+    ...#..
+    ##.###
+    ...#e.
+    .#....
+    """
+
+    demo_run(world_str)
+
+
+
+def test_demo_2():
+    world_str = """
+    ...s.#
+    .#.#..
+    .....#
+    ####.#
+    ##....
+    e..##.
+    """
+
+    demo_run(world_str)
+
+
+
 def main():
     # small_world_test()
     # test_render()
     # test_visibility_visiting()
     # test_real_space()
-    test_deviance()
+    # test_deviance()
+
+    # test_demo_2()
+    test_demo_5()
 
 
 

@@ -66,25 +66,7 @@ class World:
 
         sx, sy = source_node.coordinates
 
-        def get_visibility(node_to_check: Node):
-            cx, cy = node_to_check.coordinates
-
-            to_check = list(filter(lambda xy: self.is_grid_loc_in_bounds(xy[0], xy[1]),
-                                   get_visibility_neighbours(cx, cy, sx, sy)))
-
-            n = len(to_check)
-
-            if n == 0:
-                return 0
-
-            if n == 1:
-                nx, ny = to_check[0]
-                return (2
-                        if visibility_array[ny, nx] == 2 and self.is_grid_loc_passable(nx, ny)
-                        else 0)
-
-            return sum([visibility_array[oy, ox] == 2 and self.is_grid_loc_passable(ox, oy)
-                        for ox, oy in to_check])
+        get_visibility = get_visibility_checker(sx, sy, self, visibility_array)
 
         output = []
         queue = QueueWrap([(0, (sx, sy))])
@@ -225,22 +207,31 @@ def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
 
 
 
-def get_overshoot_checker(x: float, y: float, sx: float, sy: float) -> callable:
-    dx, dy = (sx - x, sy - y)
-
-    def overshoot_checker(x2: float, y2: float) -> bool:
-        dx2, dy2 = (sx - x2, sy - y2)
-
-        if ((dx < 0) != (dx2 < 0)) or ((dy < 0) != (dy2 < 0)):
-            return True
-
-        return False
-
-    return overshoot_checker
-
-
-
 def get_visibility_neighbours(x: int, y: int, sx: int, sy: int) -> [(int, int)]:
-    # assume (x, y) != (sx, sy)
     return ([] if sy == y else [(x, y - 1 if sy < y else y + 1)]) + \
            ([] if sx == x else [(x - 1 if sx < x else x + 1, y)])
+
+
+
+def get_visibility_checker(sx: int, sy: int, world: World, visibility_array: np.array) -> callable:
+    def get_visibility(node_to_check: Node):
+        cx, cy = node_to_check.coordinates
+
+        to_check = list(filter(lambda xy: world.is_grid_loc_in_bounds(xy[0], xy[1]),
+                               get_visibility_neighbours(cx, cy, sx, sy)))
+
+        n = len(to_check)
+
+        if n == 0:
+            return 0
+
+        if n == 1:
+            nx, ny = to_check[0]
+            return (2
+                    if visibility_array[ny, nx] == 2 and world.is_grid_loc_passable(nx, ny)
+                    else 0)
+
+        return sum([visibility_array[oy, ox] == 2 and world.is_grid_loc_passable(ox, oy)
+                    for ox, oy in to_check])
+
+    return get_visibility
